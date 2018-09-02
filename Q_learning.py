@@ -78,7 +78,7 @@ class QLearning(object):
                 Training_set["Old State"].append(Input)
                 # Run NN
                 #print('Input',Input)
-                Output = self.Network.run_NN(Input)
+                Output = self.Network.run(Input)
                 #print('Output',Output)
                 # Get direction (highest output value, 1 neuron left, second neuron up,
                 # third neuron right, fourth neuron down)
