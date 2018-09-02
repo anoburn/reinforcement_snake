@@ -9,14 +9,6 @@ class Rectangle:
         self.h = _height
         self.l = _line
         
-def textbox( _fontsize, _text, pos_l, pos_t):
-        font = pygame.font.SysFont(None, _fontsize)
-        text = font.render(_text, True, (255, 255, 255))
-        rec = text.get_rect()
-        rec.left = pos_l
-        rec.top = pos_t
-        return text, rec, font
-
 RGB = {
     0: (255, 255, 255),  # 0 = white
     1: (0, 0, 0),        # 1 = black
@@ -35,6 +27,16 @@ directions = {
     
 def get_RGB(grid, _row, _column):
         return RGB[grid[_row][_column]]
+    
+    
+def get_Key():
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return 4
+
+
+
 
 
 
@@ -126,39 +128,66 @@ class SnakeQ(object):
         self.score_old  = 0
         self.rec = Rectangle(10, 10, 1)
         self.grid = np.zeros((self.FieldSizeX, self.FieldSizeY)) 
-
+        pygame.init()
+        
+        self.screen = pygame.display.set_mode(self.size)
+        self.clock = pygame.time.Clock() 
+        
         
         
     def move(self, Network, key):
-
+        self.grid = np.zeros((self.FieldSizeX, self.FieldSizeY)) 
         #print(key)
         #print(self.snake) 
         # Calculates the new coordinates of the head of the snake
         self.snake.insert(0, [self.snake[0][0] + (key == 3 and 1) + (key == 1 and -1), self.snake[0][1] + (key == 0 and -1) + (key == 2 and 1)])
         
         # If snake crosses the boundaries kill it
-        if self.snake[0][0] == 0: self.alive = False 
-        if self.snake[0][1] == 0: self.alive = False 
-        if self.snake[0][0] == self.FieldSizeX-1: self.alive = False 
-        if self.snake[0][1] == self.FieldSizeY-1: self.alive = False 
+        if self.snake[0][0] == -1: 
+            self.alive = False
+            
+        if self.snake[0][1] == -1: 
+            self.alive = False
+        if self.snake[0][0] == self.FieldSizeX: 
+            self.alive = False
+
+        if self.snake[0][1] == self.FieldSizeY: 
+            self.alive = False
+            pass
         # If snake runs into itself kill it
-        if self.snake[0] in self.snake[1:]: self.alive = False
+        if self.snake[0] in self.snake[1:]: 
+            self.alive = False
+            pass
         self.score_old = self.score  
         # When snake eats the food             
         if self.snake[0] == self.food:
             self.food = []                                        
             self.score += 1
             while self.food == []:
-                self.food = [randint(1, self.FieldSizeX-2), randint(1, self.FieldSizeY-2)]                 # Calculating next food's coordinates
+                self.food = [randint(0, self.FieldSizeX), randint(0, self.FieldSizeY)]                 # Calculating next food's coordinates
                 if self.food in self.snake: self.food = []
         else:    
             self.snake.pop() 
-        
-                            
-        for part in self.snake:
-            self.grid[part[0]][part[1]] = 1
-        self.grid[self.food[0]][self.food[1]]
-
+            
+        if self.alive:
+             # Update grid                   
+            for part in self.snake:
+                self.grid[part[0]][part[1]] = 1
+            self.grid[self.food[0]][self.food[1]] = 2
+    
+            # Get pressed keys
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_:
+                        return 1
+            # Update window
+            for row in range(self.FieldSizeX-1):
+                for column in range(self.FieldSizeY-1):
+                    color = get_RGB(self.grid, row, column)
+                    pygame.draw.rect(self.screen, color, [(self.rec.l + self.rec.w) * column + self.rec.l + 10,
+                                                     (self.rec.l + self.rec.h) * row + self.rec.l + 10, self.rec.w, self.rec.h])
+            self.clock.tick(self.FPS)
+            pygame.display.flip()
         
         
         

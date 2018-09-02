@@ -88,19 +88,7 @@ class QLearning(object):
             score = 0
             Score = []
             Snake.start()
-            pygame.init()
-            screen = pygame.display.set_mode(Snake.size)
-
-            clock = pygame.time.Clock() 
-            for row in range(Snake.FieldSizeX):
-                    for column in range(Snake.FieldSizeY):
-                        color = get_RGB(Snake.grid, row, column)
-                        pygame.draw.rect(screen, color, [(Snake.rec.l + Snake.rec.w) * column + Snake.rec.l + 10,
-                                                         (Snake.rec.l + Snake.rec.h) * row + Snake.rec.l + 10, Snake.rec.w, Snake.rec.h])
-
-
-            pygame.display.flip()
-            clock.tick(Snake.FPS)
+            
             while Snake.alive:
                 # Get Input for the NN
                 Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
@@ -136,19 +124,7 @@ class QLearning(object):
                     train
 
                 TS_index += 1
-                clock.tick(Snake.FPS)
-                pygame.display.flip()
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_:
-                            return 1
-
-                for row in range(Snake.FieldSizeX):
-                    for column in range(Snake.FieldSizeY):
-                        color = get_RGB(Snake.grid, row, column)
-                        pygame.draw.rect(screen, color, [(Snake.rec.l + Snake.rec.w) * column + Snake.rec.l + 10,
-                                                         (Snake.rec.l + Snake.rec.h) * row + Snake.rec.l + 10, Snake.rec.w, Snake.rec.h])
-
+                
             run_time += 1
 
 
