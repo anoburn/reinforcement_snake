@@ -1,6 +1,24 @@
 import numpy as np
 import NN
 import Snake_Q
+import time
+import pygame
+
+
+RGB = {
+    0: (255, 255, 255),  # 0 = white
+    1: (0, 0, 0),        # 1 = black
+    2: (255, 0, 0),       # 2 = red
+    3: (0, 0, 255)       # 3 = blue
+}
+
+
+def get_RGB(grid, _row, _column):
+        return RGB[grid[_row][_column]]
+
+
+
+
 
 def get_input( Snake , SnakeFieldSizeX, SnakeFieldSizeY):
     Input = np.zeros(6)
@@ -70,8 +88,19 @@ class QLearning(object):
             score = 0
             Score = []
             Snake.start()
+            pygame.init()
+            screen = pygame.display.set_mode(Snake.size)
+
+            clock = pygame.time.Clock() 
+            for row in range(Snake.FieldSizeX):
+                    for column in range(Snake.FieldSizeY):
+                        color = get_RGB(Snake.grid, row, column)
+                        pygame.draw.rect(screen, color, [(Snake.rec.l + Snake.rec.w) * column + Snake.rec.l + 10,
+                                                         (Snake.rec.l + Snake.rec.h) * row + Snake.rec.l + 10, Snake.rec.w, Snake.rec.h])
 
 
+            pygame.display.flip()
+            clock.tick(Snake.FPS)
             while Snake.alive:
                 # Get Input for the NN
                 Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
@@ -107,6 +136,19 @@ class QLearning(object):
                     train
 
                 TS_index += 1
+                clock.tick(Snake.FPS)
+                pygame.display.flip()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_:
+                            return 1
+
+                for row in range(Snake.FieldSizeX):
+                    for column in range(Snake.FieldSizeY):
+                        color = get_RGB(Snake.grid, row, column)
+                        pygame.draw.rect(screen, color, [(Snake.rec.l + Snake.rec.w) * column + Snake.rec.l + 10,
+                                                         (Snake.rec.l + Snake.rec.h) * row + Snake.rec.l + 10, Snake.rec.w, Snake.rec.h])
+
             run_time += 1
 
 

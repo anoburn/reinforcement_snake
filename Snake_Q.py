@@ -1,56 +1,91 @@
 from random import randint
 import numpy as np
+import pygame
+import time
+
+class Rectangle:
+    def __init__(self, _width, _height, _line):
+        self.w = _width
+        self.h = _height
+        self.l = _line
+        
+def textbox( _fontsize, _text, pos_l, pos_t):
+        font = pygame.font.SysFont(None, _fontsize)
+        text = font.render(_text, True, (255, 255, 255))
+        rec = text.get_rect()
+        rec.left = pos_l
+        rec.top = pos_t
+        return text, rec, font
+
+RGB = {
+    0: (255, 255, 255),  # 0 = white
+    1: (0, 0, 0),        # 1 = black
+    2: (255, 0, 0),       # 2 = red
+    3: (0, 0, 255)       # 3 = blue
+}
+
+directions = {
+    0:    (0, -1),      # left
+    1:    (1, 0),      # up
+    2:    (0, 1),       # right
+    3:    (-1, 0)}       # down
+
+
+
+    
+def get_RGB(grid, _row, _column):
+        return RGB[grid[_row][_column]]
 
 
 
 
-def leftStart(WinSizeX,WinSizeY):
+def leftStart(FieldSizeX,FieldSizeY):
 
-    xHead = randint(5,WinSizeX-7)
-    yHead = randint(5,WinSizeY-7)
+    xHead = randint(5,FieldSizeX-7)
+    yHead = randint(5,FieldSizeY-7)
     snake = [[xHead,yHead], [xHead,yHead+1], [xHead,yHead+2]]                                     # Initial snake coordinates
     
-    food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                       # Initial food coordinates
+    food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
     while food in snake:
-        food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                             # Draw food
+        food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                             # Draw food
     key = 0                                                                               # Start direction snake
     return food,snake,key
 
-def upStart(WinSizeX,WinSizeY):
-    xHead = randint(5,WinSizeX-7)
-    yHead = randint(5,WinSizeY-7)
+def upStart(FieldSizeX,FieldSizeY):
+    xHead = randint(5,FieldSizeX-7)
+    yHead = randint(5,FieldSizeX-7)
     snake = [[xHead,yHead], [xHead+1,yHead], [xHead+2,yHead]]                                     # Initial snake coordinates
     
-    food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                       # Initial food coordinates
+    food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
     while food in snake:
-        food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                             # Draw food
+        food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                             # Draw food
     key = 1                                                                                 # Start direction snake
     return food,snake,key
 
-def rightStart(WinSizeX,WinSizeY):
-    xHead = randint(5,WinSizeX-7)
-    yHead = randint(5,WinSizeY-7)
+def rightStart(FieldSizeX,FieldSizeY):
+    xHead = randint(5,FieldSizeX-7)
+    yHead = randint(5,FieldSizeY-7)
     snake = [[xHead,yHead], [xHead,yHead-1], [xHead,yHead-2]]                                     # Initial snake coordinates
     
-    food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                       # Initial food coordinates
+    food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
     while food in snake:
-        food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                            # Draw food
+        food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                            # Draw food
     key = 2                                                                             # Start direction snake
     return food,snake,key
 
-def downStart(WinSizeX,WinSizeY):
-    xHead = randint(5,WinSizeX-7)
-    yHead = randint(5,WinSizeY-7)
+def downStart(FieldSizeX,FieldSizeY):
+    xHead = randint(5,FieldSizeX-7)
+    yHead = randint(5,FieldSizeY-7)
     snake = [[xHead,yHead], [xHead-1,yHead], [xHead-2,yHead]]                                     # Initial snake coordinates
     
-    food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                       # Initial food coordinates
+    food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
     while food in snake:
-        food = [randint(1, WinSizeX-2), randint(1, WinSizeY-2)]                                                             # Draw food
+        food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                             # Draw food
     key = 3                                                                                # Start direction snake
     return food,snake,key
 
 
-def switch_start(argument,WinSizeX,WinSizeY):
+def switch_start(argument,FieldSizeX,FieldSizeY):
     switcher = {
         1: rightStart,
         2: downStart,
@@ -59,7 +94,7 @@ def switch_start(argument,WinSizeX,WinSizeY):
     }
     
     startIni = switcher.get((argument))
-    food,snake,key = startIni(WinSizeX,WinSizeY)
+    food,snake,key = startIni(FieldSizeX,FieldSizeY)
 #    print('start',key,snake)
     return food,snake
 
@@ -69,19 +104,30 @@ def switch_start(argument,WinSizeX,WinSizeY):
 
 class SnakeQ(object):
     
-    def __init__(self, WinSizeX, WinSizeY):
-        self.WinSizeX = WinSizeX
-        self.WinSizeY = WinSizeY
+    def __init__(self, FieldSizeX, FieldSizeY):
+        self.FieldSizeX = FieldSizeX
+        self.FieldSizeY = FieldSizeY
         self.all_score = []
-        
+        self.WindowSizeX = FieldSizeX*11 + 20
+        self.WindowSizeY = FieldSizeY*11 + 20
+        self.grid = np.zeros((FieldSizeX, FieldSizeY))
+        # initialize game engine
+
+        self.FPS=20
+        self.size = (self.WindowSizeX, self.WindowSizeY)
+
     def start(self):
         startDirection  = randint(1, 4)                                            # random start direction 1: right, 2: down, 3: left, 4: up
-        food,snake      = switch_start(startDirection,self.WinSizeX,self.WinSizeY)
+        food,snake      = switch_start(startDirection,self.FieldSizeX,self.FieldSizeY)
         self.food       = food
         self.snake      = snake
         self.alive      = True
         self.score      = 0
         self.score_old  = 0
+        self.rec = Rectangle(10, 10, 1)
+        self.grid = np.zeros((self.FieldSizeX, self.FieldSizeY)) 
+
+        
         
     def move(self, Network, key):
 
@@ -93,8 +139,8 @@ class SnakeQ(object):
         # If snake crosses the boundaries kill it
         if self.snake[0][0] == 0: self.alive = False 
         if self.snake[0][1] == 0: self.alive = False 
-        if self.snake[0][0] == self.WinSizeX-1: self.alive = False 
-        if self.snake[0][1] == self.WinSizeY-1: self.alive = False 
+        if self.snake[0][0] == self.FieldSizeX-1: self.alive = False 
+        if self.snake[0][1] == self.FieldSizeY-1: self.alive = False 
         # If snake runs into itself kill it
         if self.snake[0] in self.snake[1:]: self.alive = False
         self.score_old = self.score  
@@ -103,20 +149,29 @@ class SnakeQ(object):
             self.food = []                                        
             self.score += 1
             while self.food == []:
-                self.food = [randint(1, self.WinSizeX-2), randint(1, self.WinSizeY-2)]                 # Calculating next food's coordinates
+                self.food = [randint(1, self.FieldSizeX-2), randint(1, self.FieldSizeY-2)]                 # Calculating next food's coordinates
                 if self.food in self.snake: self.food = []
         else:    
-            last = self.snake.pop() 
-                                        # If it does not eat the food, length decreases
+            self.snake.pop() 
+        
+                            
+        for part in self.snake:
+            self.grid[part[0]][part[1]] = 1
+        self.grid[self.food[0]][self.food[1]]
 
         
         
         
         
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+       
         
         
         
