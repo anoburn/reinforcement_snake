@@ -34,6 +34,8 @@ def get_Key():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 4
+                if event.key == pygame.K_UP:
+                    return 5
 
 
 
@@ -113,8 +115,8 @@ class SnakeQ(object):
         self.WindowSizeX = FieldSizeX*11 + 20
         self.WindowSizeY = FieldSizeY*11 + 20
         self.grid = np.zeros((FieldSizeX, FieldSizeY))
-        # initialize game engine
-
+        self.show = True
+        
         self.FPS=20
         self.size = (self.WindowSizeX, self.WindowSizeY)
 
@@ -146,36 +148,40 @@ class SnakeQ(object):
         if self.snake[0][0] == -1: 
             self.alive = False
             
-        if self.snake[0][1] == -1: 
-            self.alive = False
-        if self.snake[0][0] == self.FieldSizeX: 
-            self.alive = False
-
-        if self.snake[0][1] == self.FieldSizeY: 
-            self.alive = False
-            pass
+        if self.snake[0][1] == -1: self.alive = False
+        if self.snake[0][0] == self.FieldSizeX:  self.alive = False
+        if self.snake[0][1] == self.FieldSizeY: self.alive = False
         # If snake runs into itself kill it
-        if self.snake[0] in self.snake[1:]: 
-            self.alive = False
-            pass
-        self.score_old = self.score  
+        if self.snake[0] in self.snake[1:]:   self.alive = False
+ 
+        self.score_old = self.score 
+        
         # When snake eats the food             
         if self.snake[0] == self.food:
             self.food = []                                        
             self.score += 1
             while self.food == []:
-                self.food = [randint(0, self.FieldSizeX), randint(0, self.FieldSizeY)]                 # Calculating next food's coordinates
+                self.food = [randint(0, self.FieldSizeX-1), randint(0, self.FieldSizeY-1)]                 # Calculating next food's coordinates
                 if self.food in self.snake: self.food = []
         else:    
             self.snake.pop() 
-            
+   
+
         if self.alive:
-             # Update grid                   
-            for part in self.snake:
-                self.grid[part[0]][part[1]] = 1
-            self.grid[self.food[0]][self.food[1]] = 2
-    
+                 # Update grid                   
+                for part in self.snake:
+                    self.grid[part[0]][part[1]] = 1
+                self.grid[self.food[0]][self.food[1]] = 2
+        if not self.show:
+            if get_Key()== 5:
+                self.show = True
+
+
+
+        if self.show:     
             # Get pressed keys
+            if get_Key()== 5:
+                self.show = False
             if get_Key()== 4:
                 self.alive = False
                 pygame.QUIT
