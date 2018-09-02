@@ -176,10 +176,9 @@ class SnakeQ(object):
             self.grid[self.food[0]][self.food[1]] = 2
     
             # Get pressed keys
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_:
-                        return 1
+            if get_Key()== 4:
+                self.alive = False
+                pygame.QUIT
             # Update window
             for row in range(self.FieldSizeX-1):
                 for column in range(self.FieldSizeY-1):
