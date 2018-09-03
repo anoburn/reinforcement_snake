@@ -92,18 +92,7 @@ class QLearning(object):
             Snake.start()
             
             while Snake.alive:
-<<<<<<< HEAD
-                # Get Input for the NN
-                Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
-                Training_set["Old State"].append(Input)
-                # Run NN
-                #print('Input',Input)
-                Output = self.Network.run(Input)
-                #print('Output',Output)
-                # Get direction (highest output value, 1 neuron left, second neuron up,
-                # third neuron right, fourth neuron down)
-                key = np.where(Output== np.max(max(Output)))[0][0]
-=======
+
                 if random.random() < self.epsilon:
                     # Get Input for the NN
                     Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
@@ -117,7 +106,7 @@ class QLearning(object):
                     key = np.where(Output== np.max(max(Output)))[0][0]
                 else:
                     key = random.randint(0,3)
->>>>>>> 9ea4acb65cc1287855332de51da28b9bf777091c
+
 
                 # Move snake in the direction
                 Snake.move(self.Network, key)
