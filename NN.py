@@ -26,7 +26,9 @@ class Layer(object):
     def __init__(self, n_input, neuronCount, activation_function):
         self.neuronCount = neuronCount
         self.weights = np.random.rand(n_input, neuronCount)
+        #self.weights = np.ones((n_input, neuronCount))
         self.bias = np.random.rand(neuronCount)
+        #self.bias = np.zeros(neuronCount)
         self.activation_function = activation_functions[activation_function]
         self.derivative_function = derivative_functions[activation_function]
 
@@ -166,8 +168,14 @@ class NN(object):
     def backprop(self, gradient):
         downstream_gradient = gradient
         for layer in reversed(self.layers):
+            #print(downstream_gradient)
             downstream_gradient = layer.backward(downstream_gradient)
         return downstream_gradient
+
+    def update(self, learning_rate):
+        for layer in self.layers:
+            layer.update(learning_rate)
+
 
     def printNN(self):
         for i, layer in enumerate(self.layers):
@@ -185,16 +193,26 @@ class NN(object):
 
 
 if __name__ == '__main__':
-    network = NN([10,10], [(3,3,3), 9, 4], [None, 'ReLU', 'ReLU'])
+    #network = NN([10,10], [(3,3,3), 9, 4], [None, 'ReLU', 'ReLU'])
+    network = NN(6, [10, 4], ['ReLU', 'ReLU'])
+    #network.printNN()
+    Input = np.ones(6)
+    network.run(Input)
+    error = np.array([0, 0, 0, 1])
+    network.backprop(error)
+    network.update(1)
+    network.backprop(error)
+    network.update(1)
+    network.printNN()
     #network.printNN()
     #result = network.run_NN([1, 1])
     #print("Result:", result)
     #conv_layer = ConvLayer(3, 3, 3)
-    Input = np.random.rand(10,10)
-    result = network.run(Input)
-    print(result)
-    error = np.ones(4)
-    back = network.backprop(error)
+    #Input = np.random.rand(10,10)
+    #result = network.run(Input)
+    #print(result)
+    #error = np.ones(4)
+    #back = network.backprop(error)
     #output = conv_layer.forward(Input)
     #print(output)
     #flat = FlattenLayer((3,3), 9)
