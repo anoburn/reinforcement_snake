@@ -3,7 +3,7 @@ import NN
 import Snake_Q
 import time
 import pygame
-
+import random
 
 RGB = {
     0: (255, 255, 255),  # 0 = white
@@ -62,10 +62,10 @@ class QLearning(object):
     def Q(self, state,action,next_state,reward):
         Output = self.Network.run_NN(next_state)
         self.Q = (1-self.learning_rate) + self.learning_rate * (reward+ self.discount *np.max(max(Output)))
-    def __init__(self, discount, learning_rate, epsilon_start, epsilon_max, epsilon_increase, memory_size, batch_size, SnakeFieldSizeX , SnakeFieldSizeY):
+    def __init__(self, discount, learning_rate, epsilon_start, epsilon, epsilon_increase, memory_size, batch_size, SnakeFieldSizeX , SnakeFieldSizeY):
         self.discount         = discount
         self.learning_rate    = learning_rate                                   # alpha
-        self.epsilon_start    = epsilon_start
+        self.epsilon          = epsilon
         self.epsilon_max      = epsilon_max
         self.epsilon_increase = epsilon_increase
         self.memory_size      = memory_size
@@ -92,16 +92,19 @@ class QLearning(object):
             Snake.start()
             
             while Snake.alive:
-                # Get Input for the NN
-                Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
-                Training_set["Old State"].append(Input)
-                # Run NN
-                #print('Input',Input)
-                Output = self.Network.run_NN(Input)
-                #print('Output',Output)
-                # Get direction (highest output value, 1 neuron left, second neuron up,
-                # third neuron right, fourth neuron down)
-                key = np.where(Output== np.max(max(Output)))[0][0]
+                if random.random() < self.epsilon:
+                    # Get Input for the NN
+                    Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
+                    Training_set["Old State"].append(Input)
+                    # Run NN
+                    #print('Input',Input)
+                    Output = self.Network.run(Input)
+                    #print('Output',Output)
+                    # Get direction (highest output value, 1 neuron left, second neuron up,
+                    # third neuron right, fourth neuron down)
+                    key = np.where(Output== np.max(max(Output)))[0][0]
+                else:
+                    key = random.randint(0,3)
 
                 # Move snake in the direction
                 Snake.move(self.Network, key)
@@ -136,8 +139,8 @@ class QLearning(object):
            
             print(Snake.score)
             print(np.mean(Score))             
-    def train(self, TS):
-        s
+    #def train(self, TS):
+        
 
 SnakeFieldSizeX  = 60
 SnakeFieldSizeY  = 60
