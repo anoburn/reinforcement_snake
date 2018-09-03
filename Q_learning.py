@@ -1,6 +1,25 @@
 import numpy as np
 import NN
 import Snake_Q
+import time
+import pygame
+import random
+
+RGB = {
+    0: (255, 255, 255),  # 0 = white
+    1: (0, 0, 0),        # 1 = black
+    2: (255, 0, 0),       # 2 = red
+    3: (0, 0, 255)       # 3 = blue
+}
+
+
+def get_RGB(grid, _row, _column):
+        return RGB[grid[_row][_column]]
+
+
+
+    
+
 
 def get_input( Snake , SnakeFieldSizeX, SnakeFieldSizeY):
     Input = np.zeros(6)
@@ -40,11 +59,13 @@ def get_input( Snake , SnakeFieldSizeX, SnakeFieldSizeY):
 
 
 class QLearning(object):
-
-    def __init__(self, discount, learning_rate, epsilon_start, epsilon_max, epsilon_increase, memory_size, batch_size, SnakeFieldSizeX , SnakeFieldSizeY):
+    def Q(self, state,action,next_state,reward):
+        Output = self.Network.run_NN(next_state)
+        self.Q = (1-self.learning_rate) + self.learning_rate * (reward+ self.discount *np.max(max(Output)))
+    def __init__(self, discount, learning_rate, epsilon_start, epsilon, epsilon_increase, memory_size, batch_size, SnakeFieldSizeX , SnakeFieldSizeY):
         self.discount         = discount
         self.learning_rate    = learning_rate                                   # alpha
-        self.epsilon_start    = epsilon_start
+        self.epsilon          = epsilon
         self.epsilon_max      = epsilon_max
         self.epsilon_increase = epsilon_increase
         self.memory_size      = memory_size
@@ -60,19 +81,18 @@ class QLearning(object):
 
 
 
-    def train(self, runs):
-        Training_set = {"Old State" : [], "Current State": [], "reward": []}
+    def run(self, runs):
+        Training_set = {"Old State" : [], "Current State": [], "reward": [], "action": []}
         run_time = 0
         TS_index = 0
         Snake = Snake_Q.SnakeQ(self.SnakeFieldSizeX,self.SnakeFieldSizeY)
-
+        Score = []
+        
         while run_time < runs:
-            score = 0
-            Score = []
             Snake.start()
-
-
+            
             while Snake.alive:
+<<<<<<< HEAD
                 # Get Input for the NN
                 Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
                 Training_set["Old State"].append(Input)
@@ -83,6 +103,21 @@ class QLearning(object):
                 # Get direction (highest output value, 1 neuron left, second neuron up,
                 # third neuron right, fourth neuron down)
                 key = np.where(Output== np.max(max(Output)))[0][0]
+=======
+                if random.random() < self.epsilon:
+                    # Get Input for the NN
+                    Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
+                    Training_set["Old State"].append(Input)
+                    # Run NN
+                    #print('Input',Input)
+                    Output = self.Network.run(Input)
+                    #print('Output',Output)
+                    # Get direction (highest output value, 1 neuron left, second neuron up,
+                    # third neuron right, fourth neuron down)
+                    key = np.where(Output== np.max(max(Output)))[0][0]
+                else:
+                    key = random.randint(0,3)
+>>>>>>> 9ea4acb65cc1287855332de51da28b9bf777091c
 
                 # Move snake in the direction
                 Snake.move(self.Network, key)
@@ -100,20 +135,25 @@ class QLearning(object):
                 Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
                 Training_set["Current State"].append(Input)
                 Training_set["reward"].append(r)
+                Training_set["action"].append(key)
                 if TS_index == memory_size:
                     TS_index = 0
 
                 if TS_index == batch_size:
-                    train
+                    self.train(Training_set)
 
                 TS_index += 1
+                
             run_time += 1
 
+            self.Network.save_NN('test')
 
             Score.append(Snake.score)
-            print(np.mean(Score))
+           
             print(Snake.score)
-
+            print(np.mean(Score))             
+    #def train(self, TS):
+        
 
 SnakeFieldSizeX  = 60
 SnakeFieldSizeY  = 60
@@ -132,5 +172,5 @@ a.initialize_NN(6, [15,15,4], ['sigmoid','sigmoid','sigmoid'])
 #Snake.start()
 #Snake.move(a.Network)
 
-a.train(runs)
+a.run(runs)
 #a.Network.printNN()
