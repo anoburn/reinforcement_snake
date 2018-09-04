@@ -25,14 +25,17 @@ def get_input( Snake , SnakeFieldSizeX, SnakeFieldSizeY):
     Input = np.zeros(6)
     xHead = Snake.snake[0][0]
     yHead = Snake.snake[0][1]
+    #print(Snake.snake)
+    #print(np.shape(Snake.snake)[0])
     for index in range(np.shape(Snake.snake)[0]):
+        #print("Index:", index)
         part = Snake.snake[index]
         #print(index)
         if index == 0:
             MinLeft  = xHead
             MinUp    = yHead
-            MinRight = SnakeFieldSizeX-xHead
-            MinDown  = SnakeFieldSizeY-yHead
+            MinRight = SnakeFieldSizeX-(xHead+1)
+            MinDown  = SnakeFieldSizeY-(yHead+1)
         else:
             if xHead == part[0]:
                 if part[1]-yHead < 0:
@@ -48,13 +51,13 @@ def get_input( Snake , SnakeFieldSizeX, SnakeFieldSizeY):
         #print(MinLeft,MinUp,MinRight,MinDown)
 
 
-        Input[0] = MinLeft
-        Input[1] = MinUp
-        Input[2] = MinRight
-        Input[3] = MinDown
-        Input[4] = np.absolute(Snake.snake[0][0]-Snake.food[0])
-        Input[5] = np.absolute(Snake.snake[0][1]-Snake.food[1])
-        return Input
+    Input[0] = MinLeft
+    Input[1] = MinUp
+    Input[2] = MinRight
+    Input[3] = MinDown
+    Input[4] = Snake.snake[0][0]-Snake.food[0]
+    Input[5] = Snake.snake[0][1]-Snake.food[1]
+    return Input
 
 
 
@@ -101,6 +104,10 @@ class QLearning(object):
                             Snake.show = not Snake.show
                         elif event.key == pygame.K_p:
                             self.Network.printNN()
+                        elif event.key == pygame.K_LEFT:
+                            self.epsilon -= 0.1
+                        elif event.key == pygame.K_RIGHT:
+                            self.epsilon += 0.1
 
                 if len(Training_set) <= memory_index:
                     Training_set.append({})
@@ -108,12 +115,12 @@ class QLearning(object):
                 # Get Input for the NN
                 Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
                 Training_set[memory_index]["Old State"] = Input
+                #print('Input',Input)
 
                 if random.random() < self.epsilon:
                     # Run NN
-                    #print('Input',Input)
                     Output = self.Network.run(Input)
-                    #print('Output',Output)
+                    #print('Output', Output)
                     # Get direction (highest output value, first neuron left, second neuron up,
                     # third neuron right, fourth neuron down)
                     key = np.argmax(Output)
@@ -128,10 +135,10 @@ class QLearning(object):
                     r = 10
                 elif Snake.alive:
                     # nothing happens score is decreased for punishing long ways
-                    r = 0.1
-                elif Snake.alive== False:
+                    r = -0.1
+                elif Snake.alive == False:
                     # Score decreased if the snake died
-                    r = -10
+                    r = -100
                 Snake.reward += r
                 Input = get_input(Snake, self.SnakeFieldSizeX, self.SnakeFieldSizeY)
                 Training_set[memory_index]["Current State"] = Input
@@ -170,30 +177,31 @@ class QLearning(object):
             s_old = sample['Old State']
             a = sample['action']
 
-            if r == -10:
+            if r == -100:
                 y = r
             else:
                 y = r + self.discount * np.max(self.Network.run(s))
             gradient = np.zeros(4)
-            gradient[a] = (y - self.Network.run(s_old)[a]) ** 2
+            gradient[a] = -(y - self.Network.run(s_old)[a])
             #print(gradient, y, self.Network.run(s_old)[a])
             self.Network.backprop(gradient)
-            self.Network.update(self.learning_rate)
+            self.Network.update(self.learning_rate / self.batch_size)
+        #self.Network.printNN()
 
 
 SnakeFieldSizeX  = 30
 SnakeFieldSizeY  = 30
-runs             = 10000
+runs             = 100000
 discount         = 0.9
-learning_rate    = 1
-epsilon_start    = 0.9
+learning_rate    = 0.005
+epsilon_start    = 0.5
 epsilon_max      = 0.9
 epsilon_increase = 0.1
-memory_size      = 500
-batch_size       = 400
+memory_size      = 50
+batch_size       = 40
 
 a = QLearning(discount, learning_rate, epsilon_start, epsilon_max, epsilon_increase, memory_size, batch_size, SnakeFieldSizeX, SnakeFieldSizeY)
-a.initialize_NN(6, [6,4], ['ReLU','ReLU'])
+a.initialize_NN(6, [16, 16 ,4], ['sigmoid','ReLU','identity'])
 #Snake = Snake_Q.SnakeQ(60,60)
 #Snake.start()
 #Snake.move(a.Network)

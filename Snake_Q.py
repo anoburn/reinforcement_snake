@@ -118,6 +118,7 @@ class SnakeQ(object):
         self.show = True
 
         self.FPS=20
+        #self.FPS=0.5
         self.size = (self.WindowSizeX, self.WindowSizeY)
 
     def start(self):
@@ -130,6 +131,10 @@ class SnakeQ(object):
         self.score_old  = 0
         self.rec = Rectangle(10, 10, 1)
         self.grid = np.zeros((self.FieldSizeX, self.FieldSizeY))
+        # Update grid
+        for part in self.snake:
+            self.grid[part[0]][part[1]] = 1
+        self.grid[self.food[0]][self.food[1]] = 2
         pygame.init()
 
         self.screen = pygame.display.set_mode(self.size)
@@ -166,10 +171,10 @@ class SnakeQ(object):
 
 
         if self.alive:
-                 # Update grid
-                for part in self.snake:
-                    self.grid[part[0]][part[1]] = 1
-                self.grid[self.food[0]][self.food[1]] = 2
+             # Update grid
+            for part in self.snake:
+                self.grid[part[0]][part[1]] = 1
+            self.grid[self.food[0]][self.food[1]] = 2
 
 
 

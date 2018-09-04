@@ -14,8 +14,14 @@ def ReLU(z):
 def ReLU_diff(z):
     return np.where(z>0, 1, 0)
 
-activation_functions = {'ReLU': ReLU, 'sigmoid': sigmoid}
-derivative_functions = {'ReLU': ReLU_diff, 'sigmoid': sigmoid_diff}
+def identity(z):
+    return z
+
+def identity_diff(z):
+    return np.ones(z.shape)
+
+activation_functions = {'ReLU': ReLU, 'sigmoid': sigmoid, 'identity': identity}
+derivative_functions = {'ReLU': ReLU_diff, 'sigmoid': sigmoid_diff, 'identity': identity_diff}
 
 def load_NN( loadname):
     return pickle.load( open( loadname , "rb" ) )
@@ -44,11 +50,15 @@ class Layer(object):
         activation_gradient = upstream_gradient * self.derivative_function(self.preactivations)
 
         self.grad_bias = activation_gradient
+        #print("self.input:", self.input)
+        #print("activ. grad:", activation_gradient)
         self.grad_weights = np.outer(self.input, activation_gradient)
         downstream_gradient = activation_gradient @ self.weights.T
         return downstream_gradient
 
     def update(self, learning_rate):
+        #print("Grad_bias:", self.grad_bias)
+        #print("Grad_weights:", self.grad_weights)
         self.bias    -= learning_rate * self.grad_bias
         self.weights -= learning_rate * self.grad_weights
 
@@ -203,7 +213,7 @@ if __name__ == '__main__':
     network.update(1)
     network.backprop(error)
     network.update(1)
-    network.printNN()
+    #network.printNN()
     #network.printNN()
     #result = network.run_NN([1, 1])
     #print("Result:", result)
