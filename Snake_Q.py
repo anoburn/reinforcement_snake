@@ -180,8 +180,8 @@ class SnakeQ(object):
 
         if self.show:
             # Update window
-            for row in range(self.FieldSizeX-1):
-                for column in range(self.FieldSizeY-1):
+            for row in range(self.FieldSizeX):
+                for column in range(self.FieldSizeY):
                     color = get_RGB(self.grid, row, column)
                     pygame.draw.rect(self.screen, color, [(self.rec.l + self.rec.w) * column + self.rec.l + 10,
                                                      (self.rec.l + self.rec.h) * row + self.rec.l + 10, self.rec.w, self.rec.h])
