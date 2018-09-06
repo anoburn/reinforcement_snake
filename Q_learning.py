@@ -62,6 +62,29 @@ def get_input( Snake , SnakeFieldSizeX, SnakeFieldSizeY):
     return Input
 
 
+def get_input_images(Snake):
+    Input = np.zeros((Snake.FieldSizeX, Snake.FieldSizeY, 3))   # original field doesn't include walls
+
+    for i in range(Snake.FieldSizeX):
+        for j in range(Snake.FieldSizeY):
+            value = Snake.grid[i][j]
+            if value == 1:
+                Input[i, j, 0] = 1
+            elif value == 2:
+                Input[i, j, 1] = 1
+            elif value == 3:
+                Input[i, j, 2] = 1
+
+    Input_padded = np.empty((Snake.FieldSizeX+2, Snake.FieldSizeY+2, 3))
+    #print(Input_padded.shape)
+    Input_padded[:,:,0] = np.pad(Input[:,:,0], 1, 'constant', constant_values=(1, 1))
+    Input_padded[:,:,1] = np.pad(Input[:,:,1], 1, 'constant', constant_values=(0, 0))
+    Input_padded[:,:,2] = np.pad(Input[:,:,2], 1, 'constant', constant_values=(0, 0))
+
+    return Input_padded
+
+
+
 
 class QLearning(object):
     def Q(self, state,action,next_state,reward):
@@ -75,6 +98,7 @@ class QLearning(object):
         self.epsilon_increase = epsilon_increase
         self.memory_size      = memory_size
         self.batch_size       = batch_size
+        self.learning         = True
 
         self.SnakeFieldSizeX  = SnakeFieldSizeX
         self.SnakeFieldSizeY  = SnakeFieldSizeY
@@ -96,6 +120,7 @@ class QLearning(object):
         while run_time < runs:
             Snake.reward = 0
             timeout_counter = 0
+            lifetime = 0
             Snake.start()
 
             while Snake.alive:
@@ -113,22 +138,30 @@ class QLearning(object):
                             self.epsilon -= self.epsilon_increase
                         elif event.key == pygame.K_RIGHT:
                             self.epsilon += self.epsilon_increase
+                        elif event.key == pygame.K_SPACE:
+                            if self.learning:
+                                epsilon_temp = self.epsilon
+                                self.epsilon = 1
+                            else:
+                                self.epsilon = epsilon_temp
+                            self.learning = not self.learning
 
                 if len(Training_set) <= memory_index:
                     Training_set.append({})
 
                 # Get Input for the NN
-                Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
+                #Input = get_input(Snake,self.SnakeFieldSizeX, self.SnakeFieldSizeY )
+                Input = get_input_images(Snake)
                 Training_set[memory_index]["Old State"] = Input
                 #print('Input',Input)
 
                 if random.random() < self.epsilon:
                     # Run NN
                     Output = self.Network.run(Input)
-                    #print('Output', Output)
                     # Get direction (highest output value, first neuron left, second neuron up,
                     # third neuron right, fourth neuron down)
                     key = np.argmax(Output)
+                    print('Output:', Output, "   key:", key)
                 else:
                     options = [i for i in range(4) if not i == (last_key+2)%4]
                     key = np.random.choice(options)
@@ -141,26 +174,29 @@ class QLearning(object):
                     r = 200
                 elif Snake.alive:
                     # nothing happens score is decreased for punishing long ways
-                    r = -0.1
+                    r = 0.1
                 elif Snake.alive == False:
                     # Score decreased if the snake died
                     r = -100
                 Snake.reward += r
-                Input = get_input(Snake, self.SnakeFieldSizeX, self.SnakeFieldSizeY)
+                #Input = get_input(Snake, self.SnakeFieldSizeX, self.SnakeFieldSizeY)
+                Input = get_input_images(Snake)
                 Training_set[memory_index]["Current State"] = Input
                 Training_set[memory_index]["reward"] = r
                 Training_set[memory_index]["action"] = key
 
-                memory_index += 1
-                batch_index  += 1
-                last_key = key
+                if self.learning:
+                    memory_index += 1
+                    batch_index  += 1
+                    last_key = key
 
-                if memory_index == self.memory_size:
-                    memory_index = 0
-                if batch_index == self.batch_size:
-                    batch_index = 0
-                    self.train(Training_set)
+                    if memory_index == self.memory_size:
+                        memory_index = 0
+                    if batch_index == self.batch_size:
+                        batch_index = 0
+                        self.train(Training_set)
 
+                lifetime += 1
                 if Snake.score_old < Snake.score:
                     timeout_counter = 0
                 else:
@@ -175,7 +211,8 @@ class QLearning(object):
 
             Score.append(Snake.score)
 
-            print("Run:", run_time, "Score:", Snake.score, "Total reward:", Snake.reward, "Epsilon:", round(self.epsilon,2))
+            print("Run: {} | Score: {:>2} | Lifetime: {:>4} | Epsilon: {:.2f} | Learning: {}".format(
+                    run_time, Snake.score, lifetime, self.epsilon, self.learning))
             #print(np.mean(Score))
         pygame.quit()
 
@@ -213,21 +250,22 @@ if __name__ == "__main__":
         #Unix
         p.nice(19)
 
-    SnakeFieldSizeX  = 15
-    SnakeFieldSizeY  = 15
+    SnakeFieldSizeX  = 10
+    SnakeFieldSizeY  = 10
     runs             = 1000000
     discount         = 0.9
-    learning_rate    = 0.005
-    epsilon_start    = 0.5
+    learning_rate    = 0.0001
+    epsilon_start    = 0.05
     epsilon_max      = 0.9
     epsilon_increase = 0.01
-    memory_size      = 100
-    batch_size       = 80
+    memory_size      = 50
+    batch_size       = 40
 
     a = QLearning(discount, learning_rate, epsilon_start, epsilon_max, epsilon_increase, memory_size, batch_size, SnakeFieldSizeX, SnakeFieldSizeY)
-    a.initialize_NN(6, [16, 16 ,4], ['sigmoid','ReLU','identity'])
-    #a.Network = NN.load_NN("test")
-    #Snake = Snake_Q.SnakeQ(60,60)
+    #a.initialize_NN(6, [32, 16 ,4], ['ReLU','ReLU','identity'])
+    #a.initialize_NN((15,15), [(8,8,3,3,2), (4,4,3,2,1), 16, 8, 4], ['ReLU', 'ReLU', 'ReLU', 'ReLU', 'identity'])
+    a.Network = NN.load_NN("test")
+    #Snake = Snake_Q.SnakeQ(15,15)
     #Snake.start()
     #Snake.move(a.Network)
 

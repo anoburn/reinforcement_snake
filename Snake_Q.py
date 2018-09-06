@@ -45,41 +45,41 @@ def get_Key():
 
 def leftStart(FieldSizeX,FieldSizeY):
 
-    xHead = randint(5,FieldSizeX-7)
-    yHead = randint(5,FieldSizeY-7)
+    xHead = randint(0,FieldSizeX-1)
+    yHead = randint(1,FieldSizeY-4)
     snake = [[xHead,yHead], [xHead,yHead+1], [xHead,yHead+2]]                                     # Initial snake coordinates
 
-    food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
+    food = [randint(0, FieldSizeX-1), randint(0, FieldSizeY-1)]                                                       # Initial food coordinates
     while food in snake:
-        food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                             # Draw food
+        food = [randint(0, FieldSizeX-1), randint(0, FieldSizeY-1)]                                                             # Draw food
     key = 0                                                                               # Start direction snake
     return food,snake,key
 
 def upStart(FieldSizeX,FieldSizeY):
-    xHead = randint(5,FieldSizeX-7)
-    yHead = randint(5,FieldSizeX-7)
+    xHead = randint(1,FieldSizeX-4)
+    yHead = randint(0,FieldSizeX-1)
     snake = [[xHead,yHead], [xHead+1,yHead], [xHead+2,yHead]]                                     # Initial snake coordinates
 
-    food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
+    food = [randint(0, FieldSizeX-1), randint(0, FieldSizeY-1)]                                                       # Initial food coordinates
     while food in snake:
-        food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                             # Draw food
+        food = [randint(0, FieldSizeX-1), randint(0, FieldSizeY-1)]                                                             # Draw food
     key = 1                                                                                 # Start direction snake
     return food,snake,key
 
 def rightStart(FieldSizeX,FieldSizeY):
-    xHead = randint(5,FieldSizeX-7)
-    yHead = randint(5,FieldSizeY-7)
+    xHead = randint(3,FieldSizeX-2)
+    yHead = randint(0,FieldSizeY-1)
     snake = [[xHead,yHead], [xHead,yHead-1], [xHead,yHead-2]]                                     # Initial snake coordinates
 
-    food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
+    food = [randint(0, FieldSizeX-1), randint(0, FieldSizeY-1)]                                                       # Initial food coordinates
     while food in snake:
-        food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                            # Draw food
+        food = [randint(0, FieldSizeX-1), randint(0, FieldSizeY-1)]                                                            # Draw food
     key = 2                                                                             # Start direction snake
     return food,snake,key
 
 def downStart(FieldSizeX,FieldSizeY):
-    xHead = randint(5,FieldSizeX-7)
-    yHead = randint(5,FieldSizeY-7)
+    xHead = randint(0,FieldSizeX-1)
+    yHead = randint(3,FieldSizeY-2)
     snake = [[xHead,yHead], [xHead-1,yHead], [xHead-2,yHead]]                                     # Initial snake coordinates
 
     food = [randint(1, FieldSizeX-2), randint(1, FieldSizeY-2)]                                                       # Initial food coordinates
@@ -131,7 +131,7 @@ class SnakeQ(object):
         self.score_old  = 0
         self.rec = Rectangle(10, 10, 1)
         self.grid = np.zeros((self.FieldSizeX, self.FieldSizeY))
-        # Update grid
+        # Update grid. body: 1    food: 2
         for part in self.snake:
             self.grid[part[0]][part[1]] = 1
         self.grid[self.food[0]][self.food[1]] = 2
@@ -175,6 +175,7 @@ class SnakeQ(object):
             for part in self.snake:
                 self.grid[part[0]][part[1]] = 1
             self.grid[self.food[0]][self.food[1]] = 2
+            self.grid[self.snake[0][0]][self.snake[0][1]] = 3   # head
 
 
 
