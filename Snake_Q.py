@@ -115,7 +115,7 @@ class SnakeQ(object):
         self.WindowSizeX = FieldSizeX*11 + 20
         self.WindowSizeY = FieldSizeY*11 + 20
         self.grid = np.zeros((FieldSizeX, FieldSizeY))
-        self.show = True
+        self.show = False
 
         self.FPS=20
         #self.FPS=0.5

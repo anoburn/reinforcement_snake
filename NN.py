@@ -92,7 +92,7 @@ class ConvLayer(object):
                 region = padded[i : i + self.f, j : j + self.f]     # multidimensional are of shape (f, f, dim_in)
                 # for each output dimension multiply corresponding part of filter for that output-dimension (f, f, dim_in) with the region
                 for d in range(self.dim_out):
-                    result[i,j,d] = np.sum(region * self.filter[:,:,:,d])
+                    result[i,j,:,d] = np.sum(region * self.filter[:,:,:,d])
 
         result_pooled = np.empty((self.n_x_out, self.n_y_out, self.dim_out))
         # Remember where the maximums are for backward step later
@@ -108,7 +108,7 @@ class ConvLayer(object):
                     # region from which maximum is picked. Values can't be in several regions
                     # shape: (step_x, step_y)
                     region = result[round(i*step_x) : round((i+1)*step_x),
-                                    round(j*step_y) : round((j+1)*step_y), d]
+                                    round(j*step_y) : round((j+1)*step_y), :, d]
                     loc = np.unravel_index(np.argmax(region), region.shape)
                     result_pooled[i,j,d] = region[loc]
                     self.max_locations[0, i, j] = loc[0] + round(i*step_x)
